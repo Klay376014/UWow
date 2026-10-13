@@ -45,7 +45,7 @@ const includesIgnoreCase = (value: string, keyword: string) =>
 
 const matches = (u: User, f: UserFilters) =>
   includesIgnoreCase(u.userName, f.userName) &&
-  includesIgnoreCase(u.position, f.position) &&
+  (f.position.length === 0 || f.position.includes(u.position)) &&
   includesIgnoreCase(u.location, f.location) &&
   (f.ageMin == null || u.age >= f.ageMin) &&
   (f.ageMax == null || u.age <= f.ageMax) &&

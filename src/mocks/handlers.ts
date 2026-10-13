@@ -1,6 +1,6 @@
 import { delay, http, HttpResponse } from 'msw'
 import type { SortableKey, SortDir, UserFilters, UserInput } from '../types/user'
-import { createUser, DbError, deleteUser, queryUsers, touchRandomUser, updateUser } from './db'
+import { createUser, DbError, deleteUser, POSITIONS, queryUsers, touchRandomUser, updateUser } from './db'
 
 const SORTABLE: SortableKey[] = ['userName', 'position', 'location', 'age', 'dateStart']
 
@@ -10,7 +10,7 @@ const toIdSet = (v: string | null) => new Set(v ? v.split(',') : [])
 function parseFilters(q: URLSearchParams): UserFilters {
   return {
     userName: q.get('userName') ?? '',
-    position: q.get('position') ?? '',
+    position: q.getAll('position'),
     location: q.get('location') ?? '',
     ageMin: toNumber(q.get('ageMin')),
     ageMax: toNumber(q.get('ageMax')),
@@ -41,6 +41,11 @@ const errorResponse = (e: unknown) => {
 const latency = () => delay(Math.floor(200 + Math.random() * 300))
 
 export const handlers = [
+  http.get('/api/positions', async () => {
+    await latency()
+    return HttpResponse.json(POSITIONS)
+  }),
+
   http.get('/api/users', async ({ request }) => {
     await latency()
     const q = new URL(request.url).searchParams

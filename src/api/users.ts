@@ -25,7 +25,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
 function toSearchParams({ filters, sort }: UserQuery) {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(filters)) {
-    if (value !== '' && value != null) params.set(key, String(value))
+    if (Array.isArray(value)) value.forEach((v) => params.append(key, v))
+    else if (value !== '' && value != null) params.set(key, String(value))
   }
   if (sort.key) {
     params.set('sortBy', sort.key)
@@ -50,6 +51,8 @@ export function fetchUsers(query: UserQuery, opts: FetchUsersOptions) {
   if (opts.ids) params.set('ids', opts.ids.join(','))
   return request<PageResult<User>>(`/api/users?${params}`, { signal: opts.signal })
 }
+
+export const fetchPositions = () => request<string[]>('/api/positions')
 
 export const createUser = (input: UserInput) =>
   request<User>('/api/users', { method: 'POST', body: JSON.stringify(input) })

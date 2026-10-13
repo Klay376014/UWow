@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import UserFilterBar from './components/UserFilterBar.vue'
 import UserVirtualList from './components/UserVirtualList.vue'
+import { useUserQuery } from './composables/useUserQuery'
 import { useUserListStore } from './stores/userList'
 
 const store = useUserListStore()
 
-onMounted(() => store.reload())
+useUserQuery()
 </script>
 
 <template>
@@ -15,6 +16,8 @@ onMounted(() => store.reload())
       <span class="count">{{ store.rows.length }} / {{ store.total }}</span>
     </header>
 
+    <UserFilterBar />
+
     <main class="app-main">
       <UserVirtualList
         :rows="store.rows"
@@ -22,8 +25,10 @@ onMounted(() => store.reload())
         :loading="store.loading"
         :has-more="store.hasMore"
         :error="store.error"
+        :sort="store.sort"
         @load-more="store.loadMore()"
         @retry="store.loadMore()"
+        @sort="store.toggleSort"
       />
     </main>
   </div>

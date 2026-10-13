@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, reactive, ref, shallowRef } from 'vue'
 import { fetchUsers, PAGE_SIZE } from '../api/users'
-import { createEmptyFilters, type SortState, type User, type UserFilters } from '../types/user'
+import { createEmptyFilters, type SortableKey, type SortState, type User, type UserFilters } from '../types/user'
 
 export const useUserListStore = defineStore('userList', () => {
   const filters = reactive<UserFilters>(createEmptyFilters())
@@ -36,6 +36,27 @@ export const useUserListStore = defineStore('userList', () => {
     }
   }
 
+  const activeFilterCount = computed(
+    () => Object.values(filters).filter((v) => (Array.isArray(v) ? v.length > 0 : v !== '' && v != null)).length,
+  )
+
+  function toggleSort(key: SortableKey) {
+    if (sort.key !== key) {
+      sort.key = key
+      sort.dir = 'asc'
+    } else if (sort.dir === 'asc') {
+      sort.dir = 'desc'
+    } else {
+      sort.key = null
+      sort.dir = 'asc'
+    }
+  }
+
+  function applyFilters(next: UserFilters) {
+    Object.assign(filters, next)
+    return reload()
+  }
+
   function reload() {
     controller?.abort()
     loading.value = false
@@ -44,5 +65,18 @@ export const useUserListStore = defineStore('userList', () => {
     return loadMore()
   }
 
-  return { filters, sort, rows, total, loading, error, hasMore, loadMore, reload }
+  return {
+    filters,
+    sort,
+    rows,
+    total,
+    loading,
+    error,
+    hasMore,
+    activeFilterCount,
+    loadMore,
+    reload,
+    toggleSort,
+    applyFilters,
+  }
 })

@@ -2,7 +2,8 @@
 import { useVirtualizer } from '@tanstack/vue-virtual'
 import { computed, ref, watch, watchEffect } from 'vue'
 import { useIsDesktop } from '../composables/useBreakpoint'
-import type { User } from '../types/user'
+import { COLUMNS } from '../columns'
+import type { SortableKey, SortState, User } from '../types/user'
 import UserCard from './UserCard.vue'
 import UserTableRow from './UserTableRow.vue'
 
@@ -12,9 +13,10 @@ const props = defineProps<{
   loading: boolean
   hasMore: boolean
   error: string | null
+  sort: SortState
 }>()
 
-const emit = defineEmits<{ loadMore: []; retry: [] }>()
+const emit = defineEmits<{ loadMore: []; retry: []; sort: [key: SortableKey] }>()
 
 const PREFETCH_ROWS = 100
 const HEADER_HEIGHT = 40
@@ -43,6 +45,11 @@ const totalSize = computed(() => virtualizer.value.getTotalSize())
 
 watch(isDesktop, () => virtualizer.value.measure())
 
+const ariaSort = (key: SortableKey) =>
+  props.sort.key !== key ? 'none' : props.sort.dir === 'asc' ? 'ascending' : 'descending'
+
+const sortIcon = (key: SortableKey) => (props.sort.key !== key ? '↕' : props.sort.dir === 'asc' ? '↑' : '↓')
+
 watch(
   () => props.rows.length === 0,
   (empty) => empty && virtualizer.value.scrollToOffset(0),
@@ -66,11 +73,17 @@ watchEffect(() => {
   >
     <div class="spacer" :style="{ height: `${totalSize}px` }">
       <div v-if="isDesktop" class="table-header" role="row" aria-rowindex="1">
-        <div role="columnheader">User Name</div>
-        <div role="columnheader">Position</div>
-        <div role="columnheader">Location</div>
-        <div role="columnheader">Age</div>
-        <div role="columnheader">Date Start</div>
+        <div v-for="col in COLUMNS" :key="col.key" role="columnheader" :aria-sort="ariaSort(col.key)">
+          <button
+            type="button"
+            class="sort-button"
+            :class="{ active: sort.key === col.key }"
+            @click="emit('sort', col.key)"
+          >
+            {{ col.label }}
+            <span class="sort-icon" aria-hidden="true">{{ sortIcon(col.key) }}</span>
+          </button>
+        </div>
       </div>
 
       <div
@@ -125,6 +138,36 @@ watchEffect(() => {
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   font-weight: 600;
+}
+
+.sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 4px;
+  color: inherit;
+  background: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sort-button:hover {
+  background: var(--border);
+}
+
+.sort-button:focus-visible {
+  outline: 2px solid var(--accent);
+}
+
+.sort-icon {
+  color: var(--muted);
+}
+
+.sort-button.active .sort-icon {
+  color: var(--accent);
 }
 
 .virtual-item {

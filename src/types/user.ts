@@ -21,7 +21,7 @@ export interface SortState {
 
 export interface UserFilters {
   userName: string
-  position: string
+  position: string[]
   location: string
   ageMin: number | null
   ageMax: number | null
@@ -46,7 +46,7 @@ export interface Pin {
 
 export const createEmptyFilters = (): UserFilters => ({
   userName: '',
-  position: '',
+  position: [],
   location: '',
   ageMin: null,
   ageMax: null,
