@@ -2,6 +2,7 @@
 import { useIsDesktop } from '../composables/useBreakpoint'
 import { useOptionsStore } from '../stores/options'
 import type { UserFilters } from '../types/user'
+import { AGE_MAX, AGE_MIN } from '../validation/user'
 import MultiSelect from './MultiSelect.vue'
 
 const model = defineModel<UserFilters>({ required: true })
@@ -41,7 +42,8 @@ const toAge = (value: string) => (value === '' ? null : Math.trunc(Number(value)
     <input
       type="number"
       inputmode="numeric"
-      min="0"
+      :min="AGE_MIN"
+      :max="AGE_MAX"
       placeholder="Min"
       aria-label="Minimum age"
       :value="model.ageMin ?? ''"
@@ -51,7 +53,8 @@ const toAge = (value: string) => (value === '' ? null : Math.trunc(Number(value)
     <input
       type="number"
       inputmode="numeric"
-      min="0"
+      :min="AGE_MIN"
+      :max="AGE_MAX"
       placeholder="Max"
       aria-label="Maximum age"
       :value="model.ageMax ?? ''"

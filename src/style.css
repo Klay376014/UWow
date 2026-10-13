@@ -6,6 +6,7 @@
   --border: #d0d7de;
   --accent: #0969da;
   --danger: #cf222e;
+  --success: #1a7f37;
   --pin: #9a6700;
 
   font: 14px/1.5 system-ui, 'Segoe UI', Roboto, 'Noto Sans TC', sans-serif;
@@ -24,6 +25,7 @@
     --border: #30363d;
     --accent: #4493f8;
     --danger: #f85149;
+    --success: #3fb950;
     --pin: #d29922;
   }
 }
@@ -43,4 +45,100 @@ button,
 input,
 select {
   font: inherit;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn:focus-visible,
+.icon-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.btn-primary {
+  border-color: var(--accent);
+  color: #fff;
+  background: var(--accent);
+  font-weight: 600;
+}
+
+.btn-danger {
+  border-color: var(--danger);
+  color: #fff;
+  background: var(--danger);
+  font-weight: 600;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: none;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: var(--border);
+}
+
+.icon-btn.danger:hover {
+  color: var(--danger);
+}
+
+.modal {
+  padding: 20px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--bg);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.25);
+}
+
+.modal::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+
+.modal-title {
+  margin: 0 0 14px;
+  font-size: 1.125rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

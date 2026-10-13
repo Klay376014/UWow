@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import type { User } from '../types/user'
+import AppIcon from './AppIcon.vue'
 
 defineProps<{ user: User; index: number }>()
+const emit = defineEmits<{ edit: []; remove: [] }>()
 </script>
 
 <template>
@@ -11,6 +13,20 @@ defineProps<{ user: User; index: number }>()
     <div role="cell" class="cell" :title="user.location">{{ user.location }}</div>
     <div role="cell" class="cell num">{{ user.age }}</div>
     <div role="cell" class="cell num">{{ user.dateStart }}</div>
+    <div role="cell" class="cell actions">
+      <button type="button" class="icon-btn" :aria-label="`Edit ${user.userName}`" title="Edit" @click="emit('edit')">
+        <AppIcon name="edit" />
+      </button>
+      <button
+        type="button"
+        class="icon-btn danger"
+        :aria-label="`Delete ${user.userName}`"
+        title="Delete"
+        @click="emit('remove')"
+      >
+        <AppIcon name="delete" />
+      </button>
+    </div>
   </div>
 </template>
 
@@ -37,5 +53,11 @@ defineProps<{ user: User; index: number }>()
 
 .num {
   font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  gap: 4px;
+  padding-right: 0;
 }
 </style>

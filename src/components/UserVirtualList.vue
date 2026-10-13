@@ -16,7 +16,13 @@ const props = defineProps<{
   sort: SortState
 }>()
 
-const emit = defineEmits<{ loadMore: []; retry: []; sort: [key: SortableKey] }>()
+const emit = defineEmits<{
+  loadMore: []
+  retry: []
+  sort: [key: SortableKey]
+  edit: [user: User]
+  remove: [user: User]
+}>()
 
 const PREFETCH_ROWS = 100
 const HEADER_HEIGHT = 40
@@ -84,6 +90,7 @@ watchEffect(() => {
             <span class="sort-icon" aria-hidden="true">{{ sortIcon(col.key) }}</span>
           </button>
         </div>
+        <div role="columnheader"><span class="visually-hidden">Actions</span></div>
       </div>
 
       <div
@@ -94,8 +101,19 @@ watchEffect(() => {
         :style="{ height: `${item.size}px`, transform: `translateY(${item.start}px)` }"
       >
         <template v-if="item.index < rows.length">
-          <UserTableRow v-if="isDesktop" :user="rows[item.index]" :index="item.index" />
-          <UserCard v-else :user="rows[item.index]" />
+          <UserTableRow
+            v-if="isDesktop"
+            :user="rows[item.index]"
+            :index="item.index"
+            @edit="emit('edit', rows[item.index])"
+            @remove="emit('remove', rows[item.index])"
+          />
+          <UserCard
+            v-else
+            :user="rows[item.index]"
+            @edit="emit('edit', rows[item.index])"
+            @remove="emit('remove', rows[item.index])"
+          />
         </template>
         <div v-else class="footer">
           <template v-if="error">
@@ -113,7 +131,7 @@ watchEffect(() => {
 
 <style scoped>
 .scroller {
-  --table-columns: minmax(160px, 2fr) minmax(150px, 1.6fr) minmax(110px, 1.2fr) 72px 112px;
+  --table-columns: minmax(160px, 2fr) minmax(150px, 1.6fr) minmax(110px, 1.2fr) 72px 112px 80px;
   position: relative;
   height: 100%;
   overflow-y: auto;

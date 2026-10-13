@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker/locale/en'
 import type { SortState, User, UserFilters, UserInput } from '../types/user'
+import { AGE_MAX, AGE_MIN } from '../validation/user'
 
 const SEED = 20261013
 const ROW_COUNT = 2000
@@ -27,7 +28,7 @@ const users: User[] = Array.from({ length: ROW_COUNT }, () => ({
   userName: faker.person.fullName(),
   position: faker.helpers.arrayElement(POSITIONS),
   location: faker.helpers.arrayElement(LOCATIONS),
-  age: faker.number.int({ min: 20, max: 65 }),
+  age: faker.number.int({ min: AGE_MIN, max: AGE_MAX }),
   dateStart: faker.date.between({ from: '2010-01-01', to: '2026-10-01' }).toISOString().slice(0, 10),
   version: 1,
 }))
@@ -102,8 +103,15 @@ export function deleteUser(id: string, version: number) {
   users.splice(findIndexOrThrow(id, version), 1)
 }
 
-export function touchRandomUser(): User {
-  const user = faker.helpers.arrayElement(users)
+export function findUser(id: string): User {
+  const user = users.find((u) => u.id === id)
+  if (!user) throw new DbError(404, 'User not found')
+  return user
+}
+
+export function touchUser(id: string): User {
+  const user = findUser(id)
+  user.age = user.age >= AGE_MAX ? AGE_MIN : user.age + 1
   user.version += 1
   return user
 }

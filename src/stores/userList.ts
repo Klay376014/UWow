@@ -57,6 +57,17 @@ export const useUserListStore = defineStore('userList', () => {
     return reload()
   }
 
+  function replaceRow(user: User) {
+    rows.value = rows.value.map((r) => (r.id === user.id ? user : r))
+  }
+
+  function removeRow(id: string) {
+    const next = rows.value.filter((r) => r.id !== id)
+    if (next.length === rows.value.length) return
+    rows.value = next
+    total.value -= 1
+  }
+
   function reload() {
     controller?.abort()
     loading.value = false
@@ -78,5 +89,7 @@ export const useUserListStore = defineStore('userList', () => {
     reload,
     toggleSort,
     applyFilters,
+    replaceRow,
+    removeRow,
   }
 })

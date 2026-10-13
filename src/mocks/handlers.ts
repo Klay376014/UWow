@@ -1,6 +1,7 @@
 import { delay, http, HttpResponse } from 'msw'
 import type { SortableKey, SortDir, UserFilters, UserInput } from '../types/user'
-import { createUser, DbError, deleteUser, POSITIONS, queryUsers, touchRandomUser, updateUser } from './db'
+import { normalizeUserInput, validateUserInput } from '../validation/user'
+import { createUser, DbError, deleteUser, findUser, POSITIONS, queryUsers, touchUser, updateUser } from './db'
 
 const SORTABLE: SortableKey[] = ['userName', 'position', 'location', 'age', 'dateStart']
 
@@ -19,18 +20,10 @@ function parseFilters(q: URLSearchParams): UserFilters {
   }
 }
 
-function validate(body: Partial<UserInput>): body is UserInput {
-  return (
-    typeof body.userName === 'string' &&
-    body.userName.trim() !== '' &&
-    typeof body.position === 'string' &&
-    body.position.trim() !== '' &&
-    typeof body.location === 'string' &&
-    body.location.trim() !== '' &&
-    Number.isInteger(body.age) &&
-    typeof body.dateStart === 'string' &&
-    /^\d{4}-\d{2}-\d{2}$/.test(body.dateStart)
-  )
+function parseInput(body: Partial<UserInput>) {
+  const errors = validateUserInput(body, POSITIONS)
+  const message = Object.values(errors)[0]
+  return message ? { message } : { input: normalizeUserInput(body as UserInput) }
 }
 
 const errorResponse = (e: unknown) => {
@@ -64,19 +57,29 @@ export const handlers = [
     return HttpResponse.json(result)
   }),
 
+  http.get('/api/users/:id', async ({ params }) => {
+    await latency()
+    try {
+      return HttpResponse.json(findUser(String(params.id)))
+    } catch (e) {
+      return errorResponse(e)
+    }
+  }),
+
   http.post('/api/users', async ({ request }) => {
     await latency()
-    const body = (await request.json()) as Partial<UserInput>
-    if (!validate(body)) return HttpResponse.json({ message: 'Invalid payload' }, { status: 400 })
-    return HttpResponse.json(createUser(body), { status: 201 })
+    const { input, message } = parseInput((await request.json()) as Partial<UserInput>)
+    if (!input) return HttpResponse.json({ message }, { status: 400 })
+    return HttpResponse.json(createUser(input), { status: 201 })
   }),
 
   http.put('/api/users/:id', async ({ request, params }) => {
     await latency()
     const { version, ...body } = (await request.json()) as Partial<UserInput> & { version: number }
-    if (!validate(body)) return HttpResponse.json({ message: 'Invalid payload' }, { status: 400 })
+    const { input, message } = parseInput(body)
+    if (!input) return HttpResponse.json({ message }, { status: 400 })
     try {
-      return HttpResponse.json(updateUser(String(params.id), body, version))
+      return HttpResponse.json(updateUser(String(params.id), input, version))
     } catch (e) {
       return errorResponse(e)
     }
@@ -93,5 +96,11 @@ export const handlers = [
     }
   }),
 
-  http.post('/api/dev/touch-random', () => HttpResponse.json(touchRandomUser())),
+  http.post('/api/dev/users/:id/touch', ({ params }) => {
+    try {
+      return HttpResponse.json(touchUser(String(params.id)))
+    } catch (e) {
+      return errorResponse(e)
+    }
+  }),
 ]

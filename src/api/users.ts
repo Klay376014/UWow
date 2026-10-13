@@ -52,6 +52,8 @@ export function fetchUsers(query: UserQuery, opts: FetchUsersOptions) {
   return request<PageResult<User>>(`/api/users?${params}`, { signal: opts.signal })
 }
 
+export const fetchUser = (id: string) => request<User>(`/api/users/${id}`)
+
 export const fetchPositions = () => request<string[]>('/api/positions')
 
 export const createUser = (input: UserInput) =>
