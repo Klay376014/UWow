@@ -1,0 +1,46 @@
+:root {
+  --text: #1f2328;
+  --muted: #656d76;
+  --bg: #ffffff;
+  --surface: #f6f8fa;
+  --border: #d0d7de;
+  --accent: #0969da;
+  --danger: #cf222e;
+  --pin: #9a6700;
+
+  font: 14px/1.5 system-ui, 'Segoe UI', Roboto, 'Noto Sans TC', sans-serif;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #e6edf3;
+    --muted: #8d96a0;
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --accent: #4493f8;
+    --danger: #f85149;
+    --pin: #d29922;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
