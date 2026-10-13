@@ -8,6 +8,7 @@ Vue 3 + TypeScript + Vite。以 MSW 模擬後端（2,000 筆 mock 資料），�
 npm install
 npm run dev
 npm run build
+npm test
 ```
 
 ## 結構
