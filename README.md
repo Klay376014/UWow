@@ -11,6 +11,12 @@ npm run build
 npm test
 ```
 
+## 部署
+
+Demo：https://klay376014.github.io/UWow/
+
+推到 `main` 後由 GitHub Actions（`.github/workflows/deploy.yml`）跑測試、建置並部署到 GitHub Pages。build 與 preview 的 base 為 `/UWow/`，dev 維持 `/`。MSW 在正式環境同樣啟用，所以靜態站也能完整操作。
+
 ## 結構
 
 ```
