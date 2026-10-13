@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import UserVirtualList from './components/UserVirtualList.vue'
 import { useUserListStore } from './stores/userList'
 
 const store = useUserListStore()
@@ -15,15 +16,15 @@ onMounted(() => store.reload())
     </header>
 
     <main class="app-main">
-      <p v-if="store.error" class="error">{{ store.error }}</p>
-      <ul class="rows">
-        <li v-for="u in store.rows" :key="u.id">
-          {{ u.userName }} · {{ u.position }} · {{ u.location }} · {{ u.age }} · {{ u.dateStart }}
-        </li>
-      </ul>
-      <button v-if="store.hasMore" :disabled="store.loading" @click="store.loadMore()">
-        {{ store.loading ? 'Loading…' : 'Load more' }}
-      </button>
+      <UserVirtualList
+        :rows="store.rows"
+        :total="store.total"
+        :loading="store.loading"
+        :has-more="store.hasMore"
+        :error="store.error"
+        @load-more="store.loadMore()"
+        @retry="store.loadMore()"
+      />
     </main>
   </div>
 </template>
@@ -55,22 +56,6 @@ onMounted(() => store.reload())
 
 .app-main {
   flex: 1;
-  overflow: auto;
-  padding: 16px;
-}
-
-.rows {
-  margin: 0 0 16px;
-  padding: 0;
-  list-style: none;
-}
-
-.rows li {
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.error {
-  color: var(--danger);
+  min-height: 0;
 }
 </style>

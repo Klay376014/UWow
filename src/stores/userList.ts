@@ -19,18 +19,20 @@ export const useUserListStore = defineStore('userList', () => {
     if (loading.value) return
     loading.value = true
     error.value = null
-    controller = new AbortController()
+    const current = new AbortController()
+    controller = current
     try {
       const page = await fetchUsers(
         { filters, sort },
-        { offset: rows.value.length, limit: PAGE_SIZE, signal: controller.signal },
+        { offset: rows.value.length, limit: PAGE_SIZE, signal: current.signal },
       )
+      if (current !== controller) return
       rows.value = [...rows.value, ...page.items]
       total.value = page.total
     } catch (e) {
-      if ((e as Error).name !== 'AbortError') error.value = (e as Error).message
+      if (current === controller) error.value = (e as Error).message
     } finally {
-      loading.value = false
+      if (current === controller) loading.value = false
     }
   }
 
