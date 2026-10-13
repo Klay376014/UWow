@@ -41,6 +41,7 @@ export interface PageResult<T> {
 
 export interface Pin {
   userId: string
+  userName: string
   position: number
 }
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useVirtualizer } from '@tanstack/vue-virtual'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, nextTick, ref, watch, watchEffect } from 'vue'
 import { useIsDesktop } from '../composables/useBreakpoint'
 import { COLUMNS } from '../columns'
 import type { SortableKey, SortState, User } from '../types/user'
@@ -14,6 +14,8 @@ const props = defineProps<{
   hasMore: boolean
   error: string | null
   sort: SortState
+  pinnedIds: Set<string>
+  scrollTarget: number | null
 }>()
 
 const emit = defineEmits<{
@@ -22,6 +24,8 @@ const emit = defineEmits<{
   sort: [key: SortableKey]
   edit: [user: User]
   remove: [user: User]
+  pin: [user: User, index: number]
+  scrolled: []
 }>()
 
 const PREFETCH_ROWS = 100
@@ -59,6 +63,16 @@ const sortIcon = (key: SortableKey) => (props.sort.key !== key ? '↕' : props.s
 watch(
   () => props.rows.length === 0,
   (empty) => empty && virtualizer.value.scrollToOffset(0),
+)
+
+watch(
+  () => [props.scrollTarget, props.rows.length] as const,
+  ([target, length]) => {
+    if (target === null || length === 0) return
+    const index = target < length ? target : props.hasMore ? null : length - 1
+    if (index !== null) nextTick(() => virtualizer.value.scrollToIndex(index, { align: 'center' }))
+    emit('scrolled')
+  },
 )
 
 watchEffect(() => {
@@ -105,14 +119,19 @@ watchEffect(() => {
             v-if="isDesktop"
             :user="rows[item.index]"
             :index="item.index"
+            :pinned="pinnedIds.has(rows[item.index].id)"
             @edit="emit('edit', rows[item.index])"
             @remove="emit('remove', rows[item.index])"
+            @pin="emit('pin', rows[item.index], item.index)"
           />
           <UserCard
             v-else
             :user="rows[item.index]"
+            :index="item.index"
+            :pinned="pinnedIds.has(rows[item.index].id)"
             @edit="emit('edit', rows[item.index])"
             @remove="emit('remove', rows[item.index])"
+            @pin="emit('pin', rows[item.index], item.index)"
           />
         </template>
         <div v-else class="footer">
@@ -131,7 +150,7 @@ watchEffect(() => {
 
 <style scoped>
 .scroller {
-  --table-columns: minmax(160px, 2fr) minmax(150px, 1.6fr) minmax(110px, 1.2fr) 72px 112px 80px;
+  --table-columns: minmax(160px, 2fr) minmax(150px, 1.6fr) minmax(110px, 1.2fr) 72px 112px 116px;
   position: relative;
   height: 100%;
   overflow-y: auto;
